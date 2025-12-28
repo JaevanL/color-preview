@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Preview</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            height: 100%
+        }
+
+        main {
+            display: grid;
+            padding: 10%;
+            gap: 2rem;
+        }
+
+        img {
+            width: 50%;
+            height: auto;
+        }
+
+        input {
+            width: 50%;
+        }
+
+        p {
+            font-family: monospace;
+            font-weight: 900;
+            font-size: 2rem;
+            margin: 0;
+        }
+
+    </style>
+</head>
+<body>
+    <main>
+        <img src="image.png" id="image">
+        <input type="range" min="0" max="360" value="0" id="slider">
+        <canvas id="canvas" style="display: none;"></canvas>
+        <p id="output">#99ffaf</p>
+    </main>
+    <script>
+        const output = document.getElementById("output");
+        const slider = document.getElementById("slider");
+        const image = document.getElementById("image");
+        let hue = 0;
+        slider.addEventListener("input", function() {
+            hue = this.value;
+            image.style.filter = `hue-rotate(${hue}deg)`;
+        });
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        function rgbToHex(r, g, b) {
+            // Clamp values to 0–255
+            r = Math.max(0, Math.min(255, r));
+            g = Math.max(0, Math.min(255, g));
+            b = Math.max(0, Math.min(255, b));
+
+            // Convert each component to hex and pad with 0 if needed
+            const hr = r.toString(16).padStart(2, "0");
+            const hg = g.toString(16).padStart(2, "0");
+            const hb = b.toString(16).padStart(2, "0");
+
+            return `#${hr}${hg}${hb}`;
+        }
+
+        image.onload = () => {
+            canvas.width = image.width;
+            canvas.height = image.height;
+
+            function updateImage() {
+                const hue = slider.value;
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Apply hue filter
+                ctx.filter = `hue-rotate(${hue}deg)`;
+
+                // Draw image
+                ctx.drawImage(image, 0, 0);
+
+                // Example: get pixel at (50,50)
+                const pixel = ctx.getImageData(50, 50, 1, 1).data;
+                const [r, g, b, a] = pixel;
+                color = rgbToHex(r, g, b);
+                output.innerText = color;
+            }
+
+            // Initial draw
+            updateImage();
+
+            // Update on slider
+            slider.addEventListener("input", updateImage);
+        }
+    </script>
+</body>
+</html>
